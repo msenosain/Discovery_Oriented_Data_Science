@@ -35,7 +35,7 @@ output: html_notebook
 library(Seurat)
 
 # set your working directory
-directory<-setwd("/Users/paigevega/Desktop/CQS_2018_DiscoveryOrientedDataScience")
+directory<-setwd("/Users/msenosain/Documents/GitHub_Mafe/Discovery_Oriented_Data_Science")
 
 ```
 
@@ -47,7 +47,7 @@ directory<-setwd("/Users/paigevega/Desktop/CQS_2018_DiscoveryOrientedDataScience
   # 35,635 rows (genes)
   # 13,019 cells (names are barcodes)
 
-pbmc.data <- read.table(paste(directory,"/immune_control_expression_matrix.txt.gz", sep = ""), sep = "\t")
+pbmc.data <- read.table(paste(directory,"/data/immune_control_expression_matrix.txt.gz", sep = ""), sep = "\t")
 
 # Create the Seurat object with the raw (non-normalized data).  Keep all genes expressed in >= 5 cells. 
 
