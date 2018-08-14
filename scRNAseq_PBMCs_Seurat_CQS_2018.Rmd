@@ -4,32 +4,26 @@ output: html_notebook
 ---
 
 # Intro
-```{r}
-# Author: Paige (Spencer) Vega, Vanderbilt University, Ken Lau lab
-# This tutorial was modified from Seurat's tutorials available at the links below:
-# https://satijalab.org/seurat/pbmc3k_tutorial.html
-# https://satijalab.org/seurat/immune_alignment.html
-# You can also learn more about the Seurat tool by reading their paper:
-# https://www.nature.com/articles/nbt.4096
-```
+##### Author: Paige (Spencer) Vega, Vanderbilt University, Ken Lau lab
+##### This tutorial was modified from Seurat's tutorials available at the links below:
+##### https://satijalab.org/seurat/pbmc3k_tutorial.html
+##### https://satijalab.org/seurat/immune_alignment.html
+##### You can also learn more about the Seurat tool by reading their paper:
+##### https://www.nature.com/articles/nbt.4096
+
 
 # Data information
-```{r}
-# Kang et al., 2017 (https://www.nature.com/articles/nbt.4042)
-# to download it, follow this link:
-# https://www.dropbox.com/s/79q6dttg8yl20zg/immune_alignment_expression_matrices.zip?dl=1
+##### Kang et al., 2017 (https://www.nature.com/articles/nbt.4042)
+##### to download it, follow this link:
+##### https://www.dropbox.com/s/79q6dttg8yl20zg/immune_alignment_expression_matrices.zip?dl=1
+##### The first dataset is 13,019 PBMCs (peripheral blood mononuclear cells).  The second is 12,875 PBMCs stimulated with interferon gamma.
 
-# The first dataset is 13,019 PBMCs (peripheral blood mononuclear cells).  The second is 12,875 stimulated PBMCs.
-```
 
-# Learning goals
-```{r}
-# We have a few learning goals in this section of the analysis.  
-#   1.  Check the quality of your data and filter it.
-#   2.  Normalize, scale, and find highly variable genes (HVGs).
-#   3.  Dimension reduction.
-#   4.  Differential gene expression.
-```
+# Learning goals for section 1
+#####   1.  Check the quality of the data and filter it.
+#####   2.  Normalize, scale, and find highly variable genes (HVGs).
+#####  3.  Dimension reduction.
+#####   4.  Differential gene expression.
 
 
 
@@ -69,7 +63,7 @@ pbmc <- CreateSeuratObject(raw.data = pbmc.data, min.cells = 5, project = "contr
 ```{r}
 # The number of genes and UMIs (nGene and nUMI) are automatically calculated
 # for every object by Seurat. Use violin plots to visualize number genes and number UMIs.
-÷÷ ≥
+
 VlnPlot(object = pbmc, features.plot = c("nGene", "nUMI"), nCol = 2, point.size.use = 0.01)
 
 # Note: finding the percent mitochondrial genes for a dataset is a common QC metric, but, this dataset is already pre-processed to remove cells that have mitochondrial gene expression.
@@ -90,8 +84,8 @@ GenePlot(object = pbmc, gene1 = "nUMI", gene2 = "nGene")
 
 ```{r}
 # Based on the violin plot, filter out cells by choosing low and high thresholds.
-  # get rid of cells with very few nGenes or way too many nGene
 
+# get rid of cells with very few nGenes or way too many nGene
 pbmc <- FilterCells(object = pbmc, subset.names = "nGene", low.thresholds = 200, high.thresholds = 1800)
 
 # if you were removing cells with high % mito expression, remove them here with appropriate thresholds.
@@ -111,12 +105,12 @@ pbmc <- NormalizeData(object = pbmc)
 # pbmc@data
 ```
 
+
 # Find highly variable genes (HVGs)
 
 ```{r}
 # Find the top 1,000 most variable genes
-  # identifies outliers on a 'mean variability plot', with mean expression on the x-axis and       # dispersion on the y-axis. Corrects for the dependence on the average expression by using
-  # binning.  See ?FindVariableGenes for details.
+  # Calculates average expression and dispersion, using z-scores to determine outliers, which        accounts for the relationship between variability and avg expression.
 
 pbmc <- FindVariableGenes(pbmc)
 
@@ -148,7 +142,7 @@ pbmc <- RunPCA(object = pbmc, pc.genes = pbmc@var.genes, pcs.compute = 30, do.pr
 
 # Choose PCs
 
-```{r}
+```{r fig.height=6, fig.width=10}
 # Principle components (PCs) capture the variability in your dataset.  Although we specified 30 PCs, we want to use only the PCs that capture variability and discard the rest for downstream analyses.  You look for saturation (flatline) in the relationship between the number of principle components and the percentage of the variance explained.
 
 # 3 ways to look at PCs...
@@ -162,8 +156,8 @@ PCHeatmap(object = pbmc, pc.use = 1:15, cells.use = 500, do.balanced = TRUE, lab
 PCHeatmap(object = pbmc, pc.use = 16:30, cells.use = 500, do.balanced = TRUE, label.column = FALSE, use.full = FALSE)
 
 # 3. Jackstraw package to determine statistically significant principal components
-pbmc <- JackStraw(object = pbmc, num.pc = 30, num.replicate = 100, display.progress = TRUE)
-JackStrawPlot(object = pbmc, PCs = 1:30)
+#pbmc <- JackStraw(object = pbmc, num.pc = 30, num.replicate = 100, display.progress = TRUE)
+#JackStrawPlot(object = pbmc, PCs = 1:30)
 
 ```
 
@@ -192,7 +186,7 @@ TSNEPlot(object = pbmc)
 cluster1.markers <- FindMarkers(object = pbmc, ident.1 = 1, min.pct = 0.25)
 print(x = head(x = cluster1.markers, n =5))
 
-# cluster 1 vs cluster 4 and 5
+# cluster 1 vs cluster 5
 cluster1.markers.5 <- FindMarkers(object = pbmc, ident.1 = 1, ident.2 = 5, min.pct = 0.25)
 print(x = head(x = cluster1.markers.5, n =5))
 
@@ -205,14 +199,6 @@ print(x = head(x = cluster1.markers.5, n =5))
 # Find markers for every cluster compared to all remaining cells, report only positive ones
 pbmc.markers <- FindAllMarkers(object = pbmc, only.pos = TRUE, min.pct = 0.25, thresh.use = 0.25)
 
-# call library dplyr to use some of its functions
-library(dplyr)
-# group by cluster using group_by function and show top 5 results using top_n function
-pbmc.markers.grouped <- group_by(pbmc.markers, cluster)
-pbmc.markers.grouped.top <- top_n(pbmc.markers.grouped, 5, avg_logFC)
-# convert it to a matrix for downstream applications (trust me)
-pbmc.markers.grouped.top <- as.matrix(pbmc.markers.grouped.top)
-print(pbmc.markers.grouped.top)
 
 # What about using a different test?  On your own time, trying adding the argument test.use = "roc" and see how different your results are. 
 ```
@@ -221,7 +207,16 @@ print(pbmc.markers.grouped.top)
 # Visualize differentially expressed genes
 
 ```{r}
-# The list of DE genes is long and it would be too much information to visualize them all. So, let's plot the top 5 features (genes) for each cluster.  You could do this using a for loop, but let's keep it simple.
+# The list of DE genes is long and it would be too much information to visualize them all. So, let's plot the top 5 features (genes) for each cluster.  
+
+# call library dplyr to use some of its functions
+library(dplyr)
+# group by cluster using group_by function and show top 5 results using top_n function
+pbmc.markers.grouped <- group_by(pbmc.markers, cluster)
+pbmc.markers.grouped.top <- top_n(pbmc.markers.grouped, 5, avg_logFC)
+# convert it to a matrix for downstream applications (trust me)
+pbmc.markers.grouped.top <- as.matrix(pbmc.markers.grouped.top)
+print(pbmc.markers.grouped.top)
 
 # First, isolate the top 5 DE genes for each cluster.
 cluster_0 <- which(pbmc.markers.grouped.top[,"cluster"] == 0)
@@ -240,7 +235,7 @@ cluster_10 <- which(pbmc.markers.grouped.top[,"cluster"] == 10)
 # 3 options for visualization...
 
 # 1. Violin plots
-# if you want to see the points, insert point.size.use = 0.1 into the argument list
+# if you want to see the points, insert point.size.use = 0.01 into the argument list
 
 # # specify cluster 0 here
 VlnPlot(object = pbmc, features.plot = pbmc.markers.grouped.top[cluster_0, "gene"],
@@ -279,8 +274,6 @@ VlnPlot(object = pbmc, features.plot = pbmc.markers.grouped.top[cluster_10, "gen
 
 
 # 2. Feature plot
-# here, use t-SNE for dim reduction
-# Notes 
 # You could change the reduction.use to do PCA or ICA instead of t-SNE, but since we know where our clusters were mapped in the context of t-SNE, this makes the most sense for us.
 
 # Cluster 0
@@ -310,29 +303,29 @@ FeaturePlot(object = pbmc, features.plot = pbmc.markers.grouped.top[cluster_10, 
 # 3. Heatmap
 # Heatmaps have enough room to show you the top 5 (or more!) genes for each cluster.  Let's do the top 5, but if you have time, try changing the top features to 10 or more.
 
-# All clusters
 DoHeatmap(object = pbmc, genes.use = pbmc.markers.grouped.top[ , "gene"], slim.col.label = TRUE, remove.key = TRUE)
 
 ```
 
-# Save the object 
+# Save the object and workspace
 
 ```{r}
-# save this work and come back to it later
-
+# save this object and come back to it later
 saveRDS(pbmc, file = paste(directory, "/pbmc_only.rds", sep = ""))
+
+# save work in R
+save.image(paste(directory, "/section1.RData", sep = ""))
+
 ```
 
+save.image(paste(directory, "/section1.RData", sep = ""))
 
-
-
-# STOPPING POINT 
 
 
 # Now let's add in a second dataset, which is PBMCs stimulated with interferon gamma
 
 ```{r}
-
+# load in the data - how many cells and how many genes?  use dim(stim.data) to find out
 stim.data <- read.table(paste(directory, "/immune_stimulated_expression_matrix.txt.gz", sep = ""), sep = "\t")
 
 # create the Seurat object for the stimulated PBMCs
@@ -343,16 +336,16 @@ pbmc <- CreateSeuratObject(raw.data = pbmc.data, min.cells = 5, project = "contr
 
 ```
 
-# We have a few goals in this section of the analysis.  
-#   1.  identify cell types present in both the control pbmc and stimulated pbmc datasets
-#   2.  find markers that identify cell types that are conserved in control and stimulated pbmcs
-#   3.  compare the datasets to find cell-type specific responses to interferon stimulation 
+#### We have a few goals in this section of the analysis.  
+#####   1.  identify cell types present in both the control pbmc and stimulated pbmc datasets
+#####   2.  find markers that identify cell types that are conserved in control and stimulated pbmcs
+#####   3.  compare the datasets to find cell-type specific responses to interferon stimulation 
 
-# Really, the goal is to reinforce the major steps in scRNA-seq analysis by going over some of them again.  This time, we show how even a simple experimental design (control vs stimulated) can complicate the analysis.
+#### Really, the goal is to reinforce the major steps in scRNA-seq analysis by going over some of them again.  This time, we show how even a simple experimental design (control vs stimulated) can complicate the analysis.
 
 
 
-# Filtering, normalization, scaling, and find HVGs
+# Filtering, normalization, scaling, and finding HVGs
 ```{r}
 
 VlnPlot(object = stim, features.plot = c("nGene", "nUMI"), nCol = 2, point.size.use = 0.001)
@@ -365,6 +358,7 @@ GenePlot(object = stim, gene1 = "nUMI", gene2 = "nGene")
 
 ```{r}
 # Filter out the stimulated pbmcs with low total gene expression
+  # for this analysis, we want only the genes with at least average nGene
 stim <- FilterCells(object = stim, subset.names = "nGene", low.thresholds = 500, high.thresholds = 1800)
 # normalize
 stim <- NormalizeData(stim)
@@ -386,7 +380,6 @@ pbmc <-FindVariableGenes(pbmc)
 # make metadata indicating it is stimulated
 pbmc@meta.data$stim <- "CTRL"
 
-# Calculates average expression and dispersion, using z-scores to determine outliers, which accounts for the relationship between variability and avg expression.
 
 ```
 
@@ -406,8 +399,10 @@ genes.use <- intersect(genes.use, rownames(stim@scale.data))
 # Canonical Correlation Analysis (CCA)
 
 ```{r}
-# Run CCA
-  # Insert some info to describe CCA.
+# Run CCA to identify common sources of variation between the two datasets
+
+# CCA finds linear combinations of features across the conditions that are maximally           correlated.  In short, it searches for patterns in the datasets that are common.
+
 immune.combined <- RunCCA(pbmc, stim, genes.use = genes.use, num.cc = 30)
 
 # Visualize CCA results
@@ -431,8 +426,7 @@ plot_grid(p2, p3)
 # 2 ways to pick CCs, but we won't run the first because it takes too long to compute for the time we have in class.  Feel free to try it on your own!
 
 # # 1.  MetageneBicorPlot
-# p4 <- MetageneBicorPlot(immune.combined, grouping.var = "stim", dims.eval = 1:30, display.progress = TRUE)
-p4
+p4 <- MetageneBicorPlot(immune.combined, grouping.var = "stim", dims.eval = 1:30, display.progress = TRUE)
 
 # 2. Heatmap - use the top 500 cells
   # you need three pages to see all the CCs
@@ -503,33 +497,38 @@ FeaturePlot(object = immune.combined, features.plot = rownames(cluster7.markers)
 
 # Based on those results, what cell type is cluster 7?
 
+
 ```
 
+
+
 ```{r}
+# DO NOT RUN THIS MORE THAN ONCE
+
 # Explore markers of different immune cell populations to try to identify what cell type each cluster contains.  Select candidates based off of prior knowledge of immune cell markers.
 FeaturePlot(object = immune.combined, features.plot = c("CD3D", "SELL", "CREM", "CD8A", "GNLY", "CD79A", "FCGR3A", "CCL2", "PPBP"), min.cutoff = "q9", cols.use = c("lightgrey", "blue"), pt.size = 0.5)
 
 # Now, you can rename your clusters as these cell names.  Trust that they are correct :)
-new.ident <- c("CD14 Mono", "CD4 Naive T", "CD4 Memory T", "B", "CD16 Mono", 
+new.ident <- c("CD14 Mono", "CD4 Naive T", "CD4 Memory T", "B", "CD16 Mono",
     "T activated", "CD8 T", "NK", "DC", "B activated", "Mk", "pDC", "Eryth")
 for (i in 0:12) {
-    immune.combined <- RenameIdent(object = immune.combined, old.ident.name = i, 
+    immune.combined <- RenameIdent(object = immune.combined, old.ident.name = i,
         new.ident.name = new.ident[i + 1])
 }
 
-# Run t-SNE to see your new cluster names
+# Plot t-SNE to see your new cluster names
 TSNEPlot(immune.combined, do.label = T, pt.size = 0.5)
 
-# use SPlitDotPlotGG to plot markers of each cell type (using prior knowledge again).
-immune.combined@ident <- factor(immune.combined@ident, levels = (c("pDC", "Eryth", 
-    "Mk", "DC", "CD14 Mono", "CD16 Mono", "B activated", "B", "CD8 T", "NK", 
+use SPlitDotPlotGG to plot markers of each cell type (using prior knowledge again).
+immune.combined@ident <- factor(immune.combined@ident, levels = (c("pDC", "Eryth",
+    "Mk", "DC", "CD14 Mono", "CD16 Mono", "B activated", "B", "CD8 T", "NK",
     "T activated", "CD4 Naive T", "CD4 Memory T")))
-markers.to.plot <- c("CD3D", "CREM", "HSPH1", "SELL", "GIMAP5", "CACYBP", "GNLY", 
-    "NKG7", "CCL5", "CD8A", "MS4A1", "CD79A", "MIR155HG", "NME1", "FCGR3A", 
-    "VMO1", "CCL2", "S100A9", "HLA-DQA1", "GPR183", "PPBP", "GNG11", "HBA2", 
+markers.to.plot <- c("CD3D", "CREM", "HSPH1", "SELL", "GIMAP5", "CACYBP", "GNLY",
+    "NKG7", "CCL5", "CD8A", "MS4A1", "CD79A", "MIR155HG", "NME1", "FCGR3A",
+    "VMO1", "CCL2", "S100A9", "HLA-DQA1", "GPR183", "PPBP", "GNG11", "HBA2",
     "HBB", "TSPAN13", "IL3RA", "IGJ")
 sdp <- SplitDotPlotGG(immune.combined, genes.plot = rev(markers.to.plot), cols.use = c("blue", 
-    "red"), x.lab.rot = T, plot.legend = T, dot.scale = 8, do.return = T, grouping.var = "stim")
+    "red"), x.lab.rot = T, plot.legend = T, dot.scale = 3, do.return = T, grouping.var = "stim")
 ````
 
 
@@ -625,24 +624,24 @@ immune.combined <- SetAllIdent(immune.combined, id = "celltype.stim")
 CD14mono.interferon.response <- FindMarkers(immune.combined, ident.1 = "CD14 Mono_STIM", ident.2 = "CD14 Mono_CTRL", print.bar = FALSE)
 head(CD14mono.interferon.response, 15)
 
-# CD4 naive T cells
-CD4naiveT.interferon.response <- FindMarkers(immune.combined, ident.1 = "CD4 Naive T_STIM", ident.2 = "CD4 Naive T_CTRL", print.bar = FALSE)
-head(CD4naiveT.interferon.response, 15)
-
 # B cells
 b.interferon.response <- FindMarkers(immune.combined, ident.1 = "B_STIM", ident.2 = "B_CTRL", 
     print.bar = FALSE)
 head(b.interferon.response, 15)
 
+# CD4 naive T cells
+CD4naiveT.interferon.response <- FindMarkers(immune.combined, ident.1 = "CD4 Naive T_STIM", ident.2 = "CD4 Naive T_CTRL", print.bar = FALSE)
+head(CD4naiveT.interferon.response, 15)
 ```
 
+
 ```{r}
-# Now visualize the top 8 fold changes for these 3 groups of cells
+# Now visualize the top 8 fold changes for these 3 groups of cells.  Are these unique responses?  How would we find cell-type specific responses?
 
 # FeatureHeatmap
 
 # CD14 monocytes
-FeatureHeatmap(immune.combined, features.plot = rownames(CD14mono.interferon.response)[100:107], group.by = "stim", pt.size = 0.25, key.position = "top", max.exp = 3)
+FeatureHeatmap(immune.combined, features.plot = rownames(CD14mono.interferon.response)[1:8], group.by = "stim", pt.size = 0.25, key.position = "top", max.exp = 3)
 
 # CD4 naive T cells
 FeatureHeatmap(immune.combined, features.plot = rownames(CD4naiveT.interferon.response)[1:8], group.by = "stim", pt.size = 0.25, key.position = "top", max.exp = 3)
